@@ -7,6 +7,15 @@ class HashTableEntry:
         self.value = value
         self.next = None
 
+    def set_value(self, value):
+        self.value = value 
+
+    def set_next(self, key, value):
+        self.next = HashTableEntry(key, value)
+
+    def __str__(self):
+        return f"key: {self.key}, value: {self.value}, next: {self.next}"
+
 
 # Hash table can't have fewer than this many slots
 MIN_CAPACITY = 8
@@ -21,7 +30,11 @@ class HashTable:
     """
 
     def __init__(self, capacity):
-        # Your code here
+        # Your code here   
+        self.data = [None] *capacity if capacity >= MIN_CAPACITY else [None] * MIN_CAPACITY
+        self.capacity = capacity if capacity >= MIN_CAPACITY else MIN_CAPACITY
+        self.store = [None] * capacity
+        self.size = 0
 
 
     def get_num_slots(self):
@@ -35,6 +48,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return len(self.data)
 
 
     def get_load_factor(self):
@@ -44,6 +58,7 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        return sum([bool(x) for x in self.data]) / len(self.data)
 
 
     def fnv1(self, key):
@@ -63,6 +78,10 @@ class HashTable:
         Implement this, and/or FNV-1.
         """
         # Your code here
+        hash = 5381 
+        for h in key:
+            hash = (hash * 33) + ord(h)
+        return hash 
 
 
     def hash_index(self, key):
@@ -82,6 +101,21 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        hash = self.hash_index(key)
+        if self.data[hash] is None:
+            self.data[hash] = HashTableEntry(key, value)
+        else:
+            node = self.data[hash]
+            while node.next is not None:
+                if node.key == key:
+                    node.set_value(value)
+                    return None 
+                node = node.next 
+            if node.key == key:
+                node.set_value(value)
+                return None 
+            else:
+                node.set_next(key, value)
 
 
     def delete(self, key):
@@ -93,6 +127,20 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        hash = self.hash_index(key)
+        if self.data[hash] is None:
+            print(f"Warning: No {key} found. Cannot delete what does no yet exist.")
+            return None 
+        elif self.data[hash].key == key:
+            if self.data[hash].next == None:
+                self.data[hash] = None 
+            else:
+                self.data[hash] = self.data[hash].next 
+        else:
+            node = self.data[hash]
+            while node.next.key is not key:
+                node = node.next 
+            node.next = node.next.next 
 
 
     def get(self, key):
@@ -104,6 +152,30 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        hash = self.hash_index(key)
+        # if self.data[hash] is None:
+        #     return None 
+        # elif self.data[hash].key == key:
+        #     print(f"Getting {self.data[hash].value}")
+        #     return self.data[hash].value 
+        # else:
+        #     node = self.data[hash]
+        #     while node.next is not None:
+        #         if node.key == key:
+        #             print(f"Getting {node.value}")
+        #             return node.value 
+        #         node = node.next 
+        #     if node.key == key:
+        #         return node.value 
+        #     else:
+        #         return None 
+        curr_ = self.store[hash]
+        while curr_ is not None:
+            if curr_.key == key:
+                return curr_.value 
+            else:
+                curr_ = curr_.next 
+        return curr_ 
 
 
     def resize(self, new_capacity):
@@ -114,6 +186,16 @@ class HashTable:
         Implement this.
         """
         # Your code here
+        self.capacity = new_capacity
+        self.size = 0 
+        prev_store = self.store 
+        self.store = [None] * new_capacity
+
+        for k in prev_store:
+            while k is not None:
+                self.put(k.key, k.value)
+                k = k.next 
+        
 
 
 
