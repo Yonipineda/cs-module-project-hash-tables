@@ -1,5 +1,16 @@
+ 
+import re
+
+
 def word_count(s):
     # Your code here
+    cache = {}
+    for word in re.sub(r"[^a-zA-Z ']", ' ', s).lower().split():
+        if word in cache:
+            cache[word] += 1
+        else:
+            cache[word] = 1
+    return cache
 
 
 
